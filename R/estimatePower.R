@@ -174,10 +174,10 @@ estimatePower <- function(inputObject, groupVec,
       }, BPPARAM=BPPARAM))
     }
     
-    powerest <- calPwr(simData, alpha=0.05,
+    powerest <- calPwr(simData, alpha=alpha,
                        dataType=dataType,
                        saveResultData=FALSE,
-                       showOverallPower=TRUE)
+                       showOverallPower=FALSE)
     temp <- apply(dataMatrix, 1, function(x) NA)
     temp[names(powerest)] <- powerest
     return(temp)
@@ -233,5 +233,7 @@ switch (class(inputObject),
       paste0(savedRDataDir, filename.result))/2^10, 2), " KB"))
   }
   plotEstPwr(resObject)
+  message(sprintf("use listEstPower() to view the %s-wise power results.", 
+                  ifelse(dataTypeSelect,"gene", "protein")))
   return(resObject)
 }

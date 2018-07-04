@@ -11,12 +11,7 @@ PowerExplorerStorage <- setClass("PowerExplorerStorage",
            estPwr="DataFrame",
            predPwr="list",
            LFCRes="DataFrame",
-           parameters="list",
-           simRepNumber="numeric",
-           minLFC="numeric",
-           alpha = "numeric",
-           ST = "numeric",
-           dataType = "character"
+           parameters="list"
          )
 )
 

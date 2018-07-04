@@ -26,11 +26,10 @@ extParaMatrix <- function(dataMatrix, groupVec,
     stop("groupVec and sample number vary in length.")
   # determine input group and replicate numbers
   groupVec <- as.character(groupVec) # unfactorize the group vector
-  ###numRep <- floor(length(groupVec)/numGroup) #[!] unequal repNum
   numRep <- as.numeric(table(groupVec))
   numGroup <- length(numRep)
 
-  if(dataTypeSelect & !enableROTS) {
+  if(dataTypeSelect & !isLogTransformed) {
       cat("[DESeq2] Estimating distribution parameters...\n")
       # RNASeq raw counts and use DESeq2
       # construct a colData for DESeq2
@@ -39,16 +38,35 @@ extParaMatrix <- function(dataMatrix, groupVec,
       dispersion <- res$dispersion
       LFCRes <- res$LFCRes
       dataMatrix <- res$normCounts
+      is.na(dataMatrix) <- !dataMatrix
   }
   else{
     # calcualte log fold changes between each two groups
-    if(!isLogTransformed) {
+    if(!dataTypeSelect & !isLogTransformed) {
       cat("[vsn] Transforming data...\n")
       dataMatrix <- vsn::justvsn(dataMatrix, verbose=FALSE)
+      is.na(dataMatrix) <- !dataMatrix
     }
     LFCRes <- calLFC(dataMatrix, groupVec)
   }
-
+  #     if(dataTypeSelect){
+  #       cat("[vst] Transforming data...\n")
+  #       colData <- data.frame(group=groupVec, row.names=colnames(dataMatrix))
+  #       dataMatrix[is.na(dataMatrix)] <- 0
+  #       dds <- DESeqDataSetFromMatrix(countData = dataMatrix,
+  #                                     colData = colData,
+  #                                     design = ~group)
+  #       dataMatrix <- assay(DESeq2::vst(dds))
+  #       is.na(dataMatrix) <- !dataMatrix
+  #       LFCRes <- calLFC(dataMatrix, groupVec)
+  #     }else{
+  #       cat("[vsn] Transforming data...\n")
+  #       dataMatrix <- vsn::justvsn(dataMatrix, verbose=FALSE)
+  #       is.na(dataMatrix) <- !dataMatrix
+  #     }
+  #   }
+  # }
+  
   groups <- unique(groupVec)
   comp_index <- combn(seq_len(numGroup), 2)
   comp_index <- split(comp_index, col(comp_index))
@@ -76,25 +94,30 @@ extParaMatrix <- function(dataMatrix, groupVec,
         paraROTS[["paired"]] <- FALSE
       if(is.null(paraROTS[["progress"]]))
         paraROTS[["progress"]] <- FALSE
-
-      cat("\n[ROTS] Estimating statistics optimizing parameters...\n")
-      rots.res <- suppressMessages(
-                    ROTS(data=dataMatrix[,c(idx[[g1]], idx[[g2]])],
-                    groups=rep(c(1,2), numRep[c(g1, g2)]),
-                    log=isLogTransformed,
-                    B=paraROTS[["B"]],
-                    K=paraROTS[["K"]],
-                    paired=paraROTS[["paired"]],
-                    a1=paraROTS[["a1"]],
-                    a2=paraROTS[["a2"]],
-                    progress=paraROTS[["progress"]],
-                    seed=seed))
-      optPara <-  c(a1=rots.res$a1, a2=rots.res$a2)
-      cat(sprintf("[ROTS] optimization parameters:\na1 = %s, a2 = %s \n",
-                      optPara[1], optPara[2]))
+      if(is.null(paraROTS[["a1"]]) & is.null(paraROTS[["a1"]])){
+        cat("\n[ROTS] Estimating statistics optimizing parameters...\n")
+        rots.res <- suppressMessages(
+          ROTS(data=dataMatrix[,c(idx[[g1]], idx[[g2]])],
+               groups=rep(c(1,2), numRep[c(g1, g2)]),
+               log=isLogTransformed,
+               B=paraROTS[["B"]],
+               K=paraROTS[["K"]],
+               paired=paraROTS[["paired"]],
+               a1=paraROTS[["a1"]],
+               a2=paraROTS[["a2"]],
+               progress=paraROTS[["progress"]],
+               seed=seed))
+        optPara <-  c(a1=rots.res$a1, a2=rots.res$a2)
+        cat(sprintf("[ROTS] optimization parameters:\na1 = %s, a2 = %s \n",
+                    optPara[1], optPara[2]))
+      }
+      else{
+        cat("\n[ROTS skipped] optimization parameters a1 and a2 are provided.\n")
+        optPara <- c(a1=paraROTS[["a1"]], a2=paraROTS[["a2"]])
+      }
     }
 
-    if(dataTypeSelect & !isLogTransformed & !enableROTS) {
+    if(dataTypeSelect & !isLogTransformed) {
       #RNASeq-raw
       # calculate the means of all genes
       mean.g1 <- rowMeans(data.case.g1, na.rm = TRUE)
@@ -106,13 +129,14 @@ extParaMatrix <- function(dataMatrix, groupVec,
       meanSD.g1 <- apply(data.case.g1, 1, normDistMLE)
       meanSD.g2 <- apply(data.case.g2, 1, normDistMLE)
       paraMatrix <- t(rbind(meanSD.g1, meanSD.g2))
-
+      colnames(paraMatrix) <-
+        c("mean.g1", "sd.g1", "mean.g2", "sd.g2")
     }
-    # record number of missing values
+    # record ratio of missing values
     numMiss.g1 <- apply(data.case.g1, 1,
-                        function(x) sum(is.na(g1)))
+                        function(x) round(mean(is.na(x)),2))
     numMiss.g2 <- apply(data.case.g2, 1,
-                        function(x) sum(is.na(g2)))
+                        function(x) round(mean(is.na(x)),2))
     paraMatrix <- cbind(paraMatrix, numMiss.g1, numMiss.g2)
 
     # LFC filter
@@ -136,7 +160,7 @@ extParaMatrix <- function(dataMatrix, groupVec,
     if(enableROTS)
       attr(paraMatrix, "optPara") <- optPara
     return(paraMatrix)
-})
+}) 
   attr(paraMatrices, "LFCRes") <- LFCRes
   return(paraMatrices)
 }

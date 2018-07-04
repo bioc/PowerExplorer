@@ -8,6 +8,7 @@ estimationByDESeq2 <- function(dataMatrix, colData,
                                parallel=FALSE, BPPARAM=bpparam()) {
   # initialize DESeqDataSet
   dataMatrix[is.na(dataMatrix)] <- 0
+  mode(dataMatrix) <- "integer"
   dds <- DESeqDataSetFromMatrix(countData=dataMatrix,
                                 colData=colData,
                                 design=~ group)

@@ -48,25 +48,25 @@
         # extract parameters: para0 - mean, para1 - dispersion/sd
         para0_0 <- x[1]; para0_1 <- x[3]
         para1_0 <- x[2]; para1_1 <- x[4]
-        numMiss0 <- x[5]; numMiss1 <- x[6]
-
+        numMiss0 <- floor(x[5]*simNumRep[1])
+        numMiss1 <- floor(x[6]*simNumRep[2])
       # simulate data for each gene/protein
       # null hypohesis: two groups should follow the same distribution
-        NBdist <- dataTypeSelect & !isLogTransformed & !enableROTS
+        NBdist <- dataTypeSelect & !isLogTransformed
       simData0.1 <-
         if(NBdist) {
-          simNB(simNumRep[1]-numMiss0, simNumRep[2]-numMiss0,
+          simNB(simNumRep[1]-numMiss0, simNumRep[2]-numMiss1,
                 para0_0, para0_0, para1_0, para1_0)
         } else {
-          simNorm(simNumRep[1]-numMiss0, simNumRep[2]-numMiss0,
+          simNorm(simNumRep[1]-numMiss0, simNumRep[2]-numMiss1,
                   para0_0, para0_0, para1_0, para1_0)
         }
       simData0.2 <-
         if(NBdist) {
-          simNB(simNumRep[1]-numMiss1, simNumRep[2]-numMiss1,
+          simNB(simNumRep[1]-numMiss0, simNumRep[2]-numMiss1,
                 para0_1, para0_1, para1_1, para1_1)
         } else {
-          simNorm(simNumRep[1]-numMiss1, simNumRep[2]-numMiss1,
+          simNorm(simNumRep[1]-numMiss0, simNumRep[2]-numMiss1,
                   para0_1, para0_1, para1_1, para1_1)
         }
       simData1 <-
@@ -116,13 +116,20 @@
       if(statistics0==0) statistics1 <- 0
 
       # collection all the simulated counts and statistics
-      data0 <- ifelse(statistics0.1 >= statistics0.2,
-                      simData0.1$data,
-                      simData0.2$data)
-      data1 <- simData1$data
-      res_data <- c(data0, data1, statistics0, statistics1)
+      if(statistics0.1 >= statistics0.2)
+        data0 <- simData0.1[,1]
+      else
+        data0 <- simData0.2[,1]
+
+      data1 <- simData1[,1]
+      
+      res_data <- c(as.numeric(data0), rep(NA, (numMiss0+numMiss1)),
+                    as.numeric(data1), rep(NA, (numMiss0+numMiss1)),
+                    statistics0, statistics1)
       return(res_data)
       })
+      rownames(tempMatrix) <- c(rep(c("data0", "data1"), each=sum(simNumRep)), 
+                           "stat.null", "stat.alter")
       return(tempMatrix)
   })
   # record the attributes
@@ -141,7 +148,9 @@
                                     filename.simulatedData))
     message(">> Data saved in directory savedRData.")
     message(paste0(">> Size: ", round(file.size(
-    paste0(getwd(), "/savedRData/", filename.simulatedData))/2^20, 2), " MB"))
+    paste0(getwd(), "/savedRData/", 
+           filename.simulatedData))/2^20, 2), " MB"))
   }
+  simulatedData <<- simulatedData
   return(simulatedData)
 }

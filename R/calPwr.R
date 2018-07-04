@@ -15,7 +15,7 @@ calPwr <- function(simData,
                    alpha=0.05,
                    dataType=c("RNASeq", "Proteomics"),
                    saveResultData=FALSE,
-                   showOverallPower=TRUE) {
+                   showOverallPower=FALSE) {
   # determine the dataType
   if(identical(dataType, "RNASeq")) {
     dataTypeSelect <- TRUE
@@ -48,21 +48,7 @@ calPwr <- function(simData,
     vapply(entryNames, function(x)
                        mean(statMatrix1[x, ] > cutoffStats[x],
                        na.rm=TRUE), double(1))
-
-  # # save data
-  # names(powerEst) <- names(cutoffStats)
-  # if(saveResultData) {
-  #   if(!("savedRData" %in% list.files())) dir.create("savedRData")
-  #   filename.power <- RDataName(ifelse(dataTypeSelect,
-  #                                      "[RNASeq] Estimated Power.RData",
-  #                                      "[Proteomics] Estimated Power.RData"))
-  #   save(powerEst, file=paste0(getwd(), "/savedRData/", filename.power))
-  #   message(paste0(">> Estimated power saved in directory savedRData."))
-  #   message(paste0(">> Size: ",
-  #                  round(file.size(paste0(getwd(),
-  #                                         "/savedRData/",
-  #                                         filename.power))/2^10, 2), " KB"))
-  # }
+  cat("Completed.")
   if(showOverallPower) cat(paste0("\nOVERALL ESTIMATED POWER: ",
                                   round(mean(powerEst), 4), "\n\n"))
   return(powerEst)
