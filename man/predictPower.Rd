@@ -6,10 +6,10 @@
 \usage{
 predictPower(inputObject, groupVec, isLogTransformed = FALSE,
   dataType = c("RNASeq", "Proteomics"), enableROTS = FALSE,
-  paraROTS = list(B = 1000, K = NULL, paired = FALSE, a1 = NULL, a2 = NULL,
-  progress = FALSE), minLFC = 0.5, rangeSimNumRep = NA, alpha = 0.05,
-  ST = 100, seed = 123, parallel = FALSE, BPPARAM = bpparam(),
-  showProcess = FALSE, saveResultData = FALSE)
+  paraROTS = list(B = 1000, K = NULL, paired = FALSE, a1 = NULL, a2 =
+  NULL, progress = FALSE), minLFC = 0.5, rangeSimNumRep = NA,
+  alpha = 0.05, ST = 100, seed = 123, parallel = FALSE,
+  BPPARAM = bpparam(), showProcess = FALSE, saveResultData = FALSE)
 }
 \arguments{
 \item{inputObject}{a numeric raw Proteomics abundance data matrix,

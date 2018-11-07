@@ -22,7 +22,7 @@ simNorm <- function(n1, n2, mu1, mu2, sd1, sd2) {
     if(sum(neg.g1, neg.g2) == 0) break()
     }
   data <- c(data.group1, data.group2)
-  group.vec <- rep(c(1,2), c(n1,n2))
+  group.vec <- rep(c("A", "B"), c(n1,n2))
   abds.btw.2groups <- data.frame(data=data, group=group.vec)
   return(abds.btw.2groups)
 }

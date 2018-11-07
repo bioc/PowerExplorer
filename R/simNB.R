@@ -26,7 +26,7 @@ simNB <- function(n1, n2,
        (sum(data.group1 < 0) + sum(data.group2 < 0)) == 0) break()
   }
   cts <- c(data.group1, data.group2)
-  group.vec <- rep(c(1,2), c(n1,n2))
+  group.vec <- rep(c("A", "B"), c(n1,n2))
   data.btw.2groups <- data.frame(data=cts, group=group.vec)
   return(data.btw.2groups)
 }

@@ -6,8 +6,8 @@
 \usage{
 estimatePower(inputObject, groupVec, isLogTransformed = FALSE,
   dataType = c("RNASeq", "Proteomics"), minLFC = 0.5, alpha = 0.05,
-  ST = 100, seed = 123, enableROTS = FALSE, paraROTS = list(B = 1000, K
-  = NULL, paired = FALSE, a1 = NULL, a2 = NULL, progress = FALSE),
+  ST = 100, seed = 123, enableROTS = FALSE, paraROTS = list(B =
+  1000, K = NULL, paired = FALSE, a1 = NULL, a2 = NULL, progress = FALSE),
   showProcess = FALSE, saveResultData = FALSE, parallel = FALSE,
   BPPARAM = bpparam())
 }
