@@ -1,6 +1,6 @@
 Package: PowerExplorer
 Title: Power Estimation Tool for RNA-Seq and proteomics data
-Version: 1.8.0
+Version: 1.9.0
 Authors@R: c(person("Xu", "Qiao", role=c("aut","cre"), email="xu.qiao@utu.fi"),
              person("Laura", "Elo", role=c("cph"), email="laura.elo@utu.fi"))
 URL: https://gitlab.utu.fi/CompBioMedNGSTools/PowerExplorer
